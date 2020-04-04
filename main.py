@@ -8,10 +8,10 @@ game = 'jogo'
 max_score = 15
 
 class User:
-    def __init__(self, name, bcartela, bscore):
-        self.name = 'user:{}'.format(name)
-        self.bcartela = 'cartela:{}'.format(bcartela)
-        self.bscore = 'score:{}'.format(bscore)
+    def __init__(self, idx):
+        self.name = 'user:{}'.format(idx)
+        self.bcartela = 'cartela:{}'.format(idx)
+        self.bscore = 'score:{}'.format(idx)
     
     def pretty(self):
         return '\nUser:\nname: {}\ncartela: {}\nscore: {}'.format(self.name, self.bcartela, self.bscore)
@@ -22,7 +22,10 @@ class User:
 def printScore():
     print(r.zrange(scores, 0, -1, desc=True, withscores=True))
 
-def printWinners():
+def printWinners(rounds):
+
+    print('Sorteados:', rounds)
+
     s = r.zrange(scores, 0, -1, desc=True, withscores=True)
     print("\nBINGOOO!\n\n\nGanhadores:\n")
     print([ (name, score) for name, score in s if score == max_score ])
@@ -42,24 +45,29 @@ def main():
     r.sadd(cartela, *cartela_original)
     r.sadd(game, *cartela_original)
 
-    users = [ User(x, x, x) for x in range(1, 51)]
+    users = [ User(x) for x in range(1, 51)]
 
     for user in users:
         r.hmset(user.name, user.__dict__)
         numbers = r.srandmember(cartela, 15)
+        r.delete(user.bcartela)
         r.sadd(user.bcartela, *numbers)
         r.zadd(scores, { user.name: 0 })
 
     # game
+
+    rounds = []
     while not someone_won():
         n = round_number()        
-        print('sorteado: ', n)
+
+        rounds.append(n)
+
         for user in users:
             if r.sismember(user.bcartela, n):
                 r.zincrby(scores, 1, user.name)
             
 
-    printWinners()
+    printWinners(rounds)
 
 if __name__ == "__main__":
     main()
