@@ -13,6 +13,8 @@ Bingo game using python and redis.
 Start redis using docker
 
 > docker run -d -p 6379:6379 --name redis1 redis                                                                                                                                         
+
+
 To use redis-cli, you need to enter the container shell
 
 > docker exec -it redis1 sh   
