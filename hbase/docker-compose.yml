@@ -1,0 +1,16 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  hbase:
+    image: dajobe/hbase
+    restart: always
+    ports:
+     - 16010:16010
+     - 16000:16000
+     - 8085:8085
+     - 8020:8020
+     - 9095:9095
+    volumes:
+     - $PWD/seed:/seed
